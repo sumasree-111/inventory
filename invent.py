@@ -69,7 +69,7 @@ else:
 st.sidebar.markdown("<h2 style='text-align: center; color: #FFD700; border: none;'>SREE SOLUTIONS</h2>", unsafe_allow_html=True)
 st.sidebar.markdown("---")
 
-REPORT_NUMBERS = ["91XXXXXXXXXX"] # Update this Sree
+REPORT_NUMBERS = ["919948223369","919493878186",] # Update this Sree
 page = st.sidebar.radio("CHOOSE SECTION", ["🏠 Billing", "📊 Dashboard", "⚙️ Inventory", "📜 History"])
 
 # --- 4. PAGES ---
