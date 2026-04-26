@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 import sqlite3
 import requests
+import os
 
 # --- 1. GLOBAL CONFIGURATION & LUXURY THEME ---
 st.set_page_config(page_title="Sree Solutions", layout="wide")
@@ -11,19 +12,35 @@ st.markdown("""
 <style>
     [data-testid="stAppViewContainer"] { background-color: #050505; color: #ffffff; }
     [data-testid="stSidebar"] { background-color: #000000 !important; border-right: 1px solid #FFD700; }
+    
+    /* SIDEBAR TEXT & HEADINGS */
     [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] p,
     [data-testid="stSidebar"] span, [data-testid="stSidebar"] label, [data-testid="stWidgetLabel"] p { 
         color: #FFD700 !important; font-weight: bold !important; 
     }
+    
+    /* METRICS & DASHBOARD */
     [data-testid="stMetricValue"] { color: #FFD700 !important; font-weight: bold; }
-    .stButton>button { background-color: #FFD700 !important; color: #000000 !important; font-weight: bold; width: 100%; border-radius: 10px; }
+    
+    /* MODERN BUTTONS */
+    .stButton>button { 
+        background-color: #FFD700 !important; 
+        color: #000000 !important; 
+        font-weight: bold; 
+        width: 100%; 
+        border-radius: 10px; 
+        height: 3em;
+    }
     .stButton>button:hover { background-color: #ffffff !important; }
+
+    /* TABLE HEADERS */
+    div[data-testid="stTable"] th { color: #FFD700 !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 2. DATABASE SETUP ---
+# --- 2. DATABASE & WHATSAPP LOGIC ---
 def get_connection():
-    return sqlite3.connect('sree_business_v10.db', check_same_thread=False)
+    return sqlite3.connect('sree_business_v11.db', check_same_thread=False)
 
 def init_db():
     conn = get_connection()
@@ -33,7 +50,6 @@ def init_db():
     conn.commit()
 init_db()
 
-# --- 3. WHATSAPP LOGIC (SECURE) ---
 def send_silent_whatsapp(numbers, message):
     try:
         id_inst = st.secrets["GREEN_API_ID"]
@@ -43,15 +59,20 @@ def send_silent_whatsapp(numbers, message):
             requests.post(url, json={"chatId": f"{str(num).strip()}@c.us", "message": message})
     except: pass
 
-# --- 4. SIDEBAR ---
-st.sidebar.markdown("<h1>🛍️</h1>", unsafe_allow_html=True)
-st.sidebar.markdown("<h2>SREE SOLUTIONS</h2>", unsafe_allow_html=True)
+# --- 3. SIDEBAR WITH LOGO ---
+# GitHub lo 'logo.png' unte adhi load avthundi, lekapothe emoji chupisthundi
+if os.path.exists("logo.png"):
+    st.sidebar.image("logo.png", use_container_width=True)
+else:
+    st.sidebar.markdown("<h1 style='text-align: center; color: #FFD700;'>🛍️</h1>", unsafe_allow_html=True)
+
+st.sidebar.markdown("<h2 style='text-align: center; color: #FFD700; border: none;'>SREE SOLUTIONS</h2>", unsafe_allow_html=True)
 st.sidebar.markdown("---")
 
-REPORT_NUMBERS = ["918555979777","919948223369"] # Nee WhatsApp number ikkada pettu Sree
+REPORT_NUMBERS = ["91XXXXXXXXXX"] # Update this Sree
 page = st.sidebar.radio("CHOOSE SECTION", ["🏠 Billing", "📊 Dashboard", "⚙️ Inventory", "📜 History"])
 
-# --- 5. PAGES ---
+# --- 4. PAGES ---
 if "🏠 Billing" in page:
     st.markdown("<h1 style='color: #FFD700;'>🧾 Live Billing</h1>", unsafe_allow_html=True)
     conn = get_connection()
@@ -85,18 +106,15 @@ if "🏠 Billing" in page:
                     d = datetime.now().strftime('%Y-%m-%d')
                     d_show = datetime.now().strftime('%d-%m-%Y %H:%M')
                     
-                    # --- 📦 Item List Logic (Nuvvu adigindi) ---
                     items_details = ""
                     for _, r in sold.iterrows():
                         items_details += f"\n• {r['product']} (Qty: {int(r['Qty'])})"
                     
-                    # Database Update
                     for _, r in sold.iterrows():
                         conn.execute("UPDATE master_stock SET stock = stock - ? WHERE product = ?", (r['Qty'], r['product']))
                         conn.execute("INSERT INTO sales_history VALUES (?,?,?,?,?)", (d, r['product'], r['Qty'], r['Mode'], r['Total']))
                     conn.commit()
                     
-                    # --- 📝 Final Report Matter ---
                     report_msg = f"""
 *SALE CONFIRMED - SREE SOLUTIONS*
 -------------------------------
