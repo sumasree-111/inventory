@@ -8,9 +8,22 @@ import time
 import threading
 
 # --- 1. PAGE CONFIG ---
+st.markdown('<meta name="referrer" content="no-reffer">', unsafe_allow_html=True)
+
 st.set_page_config(page_title="Sree Solutions", layout="wide", page_icon="🛍️")
 
 # --- 2. THEME & BUTTON VISIBILITY FIX ---
+st.markdown("""
+<style>
+iframe { 
+    border: none;
+    width: 100%;
+    height: 100%
+    }
+    header { visibility: hidden;}
+  </style>
+ """, unsafe_allow_html=True) 
+  
 st.markdown("""
 <style>
     /* Main Background */
